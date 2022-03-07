@@ -30,6 +30,7 @@ export function Sidebar() {
             <DrawerHeader>Navegação</DrawerHeader>
 
             <DrawerBody>
+              {/* Ainda não está abrindo a Drawer */}
               <SidebarNav />
             </DrawerBody>
           </DrawerContent>
