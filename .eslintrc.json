@@ -27,6 +27,7 @@
     "react/jsx-props-no-spreading": "off",
     "import/prefer-default-export": "off",
     "react/require-default-props": "off",
+    "@typescript-eslint/no-empty-function": "off",
     "prettier/prettier": "error",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
