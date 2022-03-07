@@ -30,7 +30,7 @@ export function Sidebar() {
             <DrawerHeader>Navegação</DrawerHeader>
 
             <DrawerBody>
-              <Sidebar />
+              <SidebarNav />
             </DrawerBody>
           </DrawerContent>
         </DrawerOverlay>
