@@ -35,6 +35,7 @@ export function Header() {
           fontSize="24"
           variant="unstyled"
           onClick={onOpen}
+          marginTop="2"
           marginRight="2"
         />
       )}
