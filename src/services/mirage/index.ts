@@ -1,4 +1,5 @@
-import { createServer, Model } from 'miragejs';
+import { createServer, Factory, Model } from 'miragejs';
+import { faker } from '@faker-js/faker';
 
 type User = {
   name: string;
@@ -14,11 +15,37 @@ function makeServer() {
       user: Model.extend<Partial<User>>({}),
     },
 
+    /**
+     * As factores são forma para conseguirmos gerar dados em massa
+     * Precisa ser o mesmo nome do Model
+     */
+    factories: {
+      user: Factory.extend({
+        name(indice: number) {
+          return `User ${indice + 1}`;
+        },
+        email() {
+          return faker.internet.email().toLowerCase();
+        },
+        created_at() {
+          return faker.date.recent(10);
+        },
+      }),
+    },
+
+    /**
+     * para criar qualquer tipo de dados, assim que o servidor do mirage for inicializado
+     */
+    seeds(s) {
+      s.createList('user', 200);
+    },
+
     routes() {
       this.namespace = 'api';
       /**
        * vai fazer com que toda chamada para o mirage
        * demore 750ms para acontecer. Vai ficar com esse delay
+       * importante quando queremos testar os carregamentos dos spinners, loadings
        */
       this.timing = 750;
 
@@ -40,6 +67,12 @@ function makeServer() {
        * Por isso fazemos isso para resetar o namespace
        */
       this.namespace = '';
+      /**
+       * vai fazer com que toda chamada que sejam enviadas para o endereço api
+       * passem pelo mirage e se elas não forem detectadas pelas rotas do mirage
+       * elas passem adiante para rota original delas
+       */
+      this.passthrough();
     },
   });
 
