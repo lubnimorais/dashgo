@@ -1,7 +1,48 @@
-import { Stack, Box } from '@chakra-ui/react';
+import { useMemo, useCallback } from 'react';
+import { Stack, Box, Text } from '@chakra-ui/react';
 import { PaginationItem } from './PaginationItem';
 
-export function Pagination() {
+interface IPaginationProps {
+  totalCountOfRegisters: number;
+  registersPerPage?: number; // por padrão vai ser 10
+  currentPage?: number; // por padrão vai ser 1
+  onPageChange: (page: number) => void;
+}
+
+const siblingsCount = 1;
+
+export function Pagination({
+  totalCountOfRegisters,
+  registersPerPage = 10,
+  currentPage = 1,
+  onPageChange,
+}: IPaginationProps) {
+  const lastPage = useMemo(() => {
+    // vai arredondar sempre para cima
+    return Math.floor(totalCountOfRegisters / registersPerPage);
+  }, [registersPerPage, totalCountOfRegisters]);
+
+  const generatePagesArray = useCallback((from: number, to: number) => {
+    return [...new Array(to - from)]
+      .map((_, index) => {
+        return from + index + 1;
+      })
+      .filter(page => page > 0);
+  }, []);
+
+  const previousPages =
+    currentPage > 1
+      ? generatePagesArray(currentPage - 1 - siblingsCount, currentPage - 1)
+      : [];
+
+  const nextPages =
+    currentPage < lastPage
+      ? generatePagesArray(
+          currentPage,
+          Math.min(currentPage + siblingsCount, lastPage),
+        )
+      : [];
+
   return (
     <Stack
       spacing="6"
@@ -11,15 +52,66 @@ export function Pagination() {
       align="center"
     >
       <Box>
-        <strong>0</strong> - <strong>10</strong> de <strong>100</strong>
+        <strong>0</strong> - <strong>10</strong> de{' '}
+        <strong>{totalCountOfRegisters}</strong>
       </Box>
 
       <Stack direction="row" spacing="2">
-        <PaginationItem isCurrent number={1} />
-        <PaginationItem number={2} />
-        <PaginationItem number={3} />
-        <PaginationItem number={4} />
-        <PaginationItem number={5} />
+        {/* mostrar a primeira página */}
+        {currentPage > 1 + siblingsCount && (
+          <>
+            <PaginationItem number={1} onPageChange={onPageChange} />
+
+            {currentPage > 2 + siblingsCount && (
+              <Text width="8" textAlign="center" color="gray.300">
+                ...
+              </Text>
+            )}
+          </>
+        )}
+
+        {/* páginas anteriores */}
+        {previousPages.length > 0 &&
+          previousPages.map(page => {
+            return (
+              <PaginationItem
+                key={page}
+                number={page}
+                onPageChange={onPageChange}
+              />
+            );
+          })}
+
+        <PaginationItem
+          number={currentPage}
+          isCurrent
+          onPageChange={onPageChange}
+        />
+
+        {/* próximas páginas */}
+        {nextPages.length > 0 &&
+          nextPages.map(page => {
+            return (
+              <PaginationItem
+                key={page}
+                number={page}
+                onPageChange={onPageChange}
+              />
+            );
+          })}
+
+        {/* mostrar a última página */}
+        {currentPage + siblingsCount < lastPage && (
+          <>
+            {currentPage + 1 + siblingsCount < lastPage && (
+              <Text width="8" textAlign="center" color="gray.300">
+                ...
+              </Text>
+            )}
+
+            <PaginationItem number={lastPage} onPageChange={onPageChange} />
+          </>
+        )}
       </Stack>
     </Stack>
   );
