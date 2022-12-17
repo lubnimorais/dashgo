@@ -19,8 +19,20 @@ export function Pagination({
 }: IPaginationProps) {
   const lastPage = useMemo(() => {
     // vai arredondar sempre para cima
-    return Math.floor(totalCountOfRegisters / registersPerPage);
+    return Math.ceil(totalCountOfRegisters / registersPerPage);
   }, [registersPerPage, totalCountOfRegisters]);
+
+  const itemFirstPosition = useMemo(() => {
+    if (currentPage === 1) {
+      return 1;
+    }
+
+    return currentPage * registersPerPage - registersPerPage + 1;
+  }, [currentPage, registersPerPage]);
+
+  const itemLastPosition = useMemo(() => {
+    return currentPage * registersPerPage;
+  }, [currentPage, registersPerPage]);
 
   const generatePagesArray = useCallback((from: number, to: number) => {
     return [...new Array(to - from)]
@@ -52,7 +64,8 @@ export function Pagination({
       align="center"
     >
       <Box>
-        <strong>0</strong> - <strong>10</strong> de{' '}
+        <strong>{itemFirstPosition}</strong> -{' '}
+        <strong>{itemLastPosition}</strong> de{' '}
         <strong>{totalCountOfRegisters}</strong>
       </Box>
 

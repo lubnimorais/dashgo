@@ -22,7 +22,8 @@ import {
 
 import { RiAddLine } from 'react-icons/ri';
 
-import { useUsers } from '../../hooks/useUsers';
+import { GetServerSideProps } from 'next';
+import { getUsers, useUsers } from '../../hooks/useUsers';
 
 import { api } from '../../services/api';
 
@@ -32,7 +33,19 @@ import { Header } from '../../components/Header';
 import { Pagination } from '../../components/Pagination';
 import { Sidebar } from '../../components/Sidebar';
 
-export default function UserList() {
+type IUser = {
+  id: string;
+  name: string;
+  email: string;
+  created_at: string;
+  created_at_formatted: string;
+};
+
+interface IGetServeSideProps {
+  users: Array<IUser>;
+}
+
+export default function UserList({ users }: IGetServeSideProps) {
   const [page, setPage] = useState(1);
 
   const isWideVersion = useBreakpointValue({
@@ -54,7 +67,9 @@ export default function UserList() {
     );
   }, []);
 
-  const { data, isLoading, isFetching, error } = useUsers(page);
+  const { data, isLoading, isFetching, error } = useUsers(page, {
+    initialData: users,
+  });
 
   return (
     <Box>
@@ -163,3 +178,14 @@ export default function UserList() {
     </Box>
   );
 }
+
+export const getServeSideProps: GetServerSideProps = async () => {
+  const { users, totalCount } = await getUsers(1);
+
+  return {
+    props: {
+      users,
+      totalCount,
+    },
+  };
+};

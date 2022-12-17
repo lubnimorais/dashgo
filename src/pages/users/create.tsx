@@ -1,9 +1,13 @@
+import { useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 import { SubmitHandler, useForm } from 'react-hook-form';
+
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import { useMutation } from 'react-query';
 import {
   Box,
   Button,
@@ -15,7 +19,9 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
-import { useCallback } from 'react';
+import { api } from '../../services/api';
+import { queryClient } from '../../services/queryClient';
+
 import { Input } from '../../components/Form/Input';
 import { Header } from '../../components/Header';
 import { Sidebar } from '../../components/Sidebar';
@@ -40,6 +46,26 @@ const createUserFormSchema = Yup.object().shape({
 });
 
 export default function CreateUser() {
+  const router = useRouter();
+
+  const createUser = useMutation(
+    async (user: CreateUserFormData) => {
+      const response = await api.post('/users', {
+        user: {
+          ...user,
+          created_at: new Date(),
+        },
+      });
+
+      return response.data.user;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('users');
+      },
+    },
+  );
+
   const { register, formState, handleSubmit } = useForm({
     resolver: yupResolver(createUserFormSchema),
   });
@@ -47,8 +73,17 @@ export default function CreateUser() {
   const { errors } = formState;
 
   const handleCreateUser: SubmitHandler<CreateUserFormData> = useCallback(
-    async ({ name, email, password, password_confirmation }) => {},
-    [],
+    async ({ name, email, password, password_confirmation }) => {
+      await createUser.mutateAsync({
+        name,
+        email,
+        password,
+        password_confirmation,
+      });
+
+      router.push('/users');
+    },
+    [createUser, router],
   );
 
   return (
